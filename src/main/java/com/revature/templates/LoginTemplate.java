@@ -6,7 +6,6 @@ public class LoginTemplate {
 	private String username;
 	private String password;
 
-	// Constructors
 	public LoginTemplate() {
 		super();
 	}
@@ -17,7 +16,6 @@ public class LoginTemplate {
 		this.password = password;
 	}
 
-	// Getters & Setters
 	public String getUsername() {
 		return username;
 	}
@@ -34,7 +32,6 @@ public class LoginTemplate {
 		this.password = password;
 	}
 
-	// Method Override
 	@Override
 	public int hashCode() {
 		return Objects.hash(password, username);
