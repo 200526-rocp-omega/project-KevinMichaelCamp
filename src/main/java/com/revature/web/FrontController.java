@@ -19,6 +19,7 @@ import com.revature.models.AccountDisplay;
 import com.revature.models.User;
 import com.revature.models.UserAccount;
 import com.revature.templates.AccountTemplate;
+import com.revature.templates.JointTemplate;
 import com.revature.templates.LoginTemplate;
 import com.revature.templates.MessageTemplate;
 import com.revature.templates.TimeTemplate;
@@ -157,6 +158,7 @@ public class FrontController extends HttpServlet {
 					switch (portions[1]) {
 					case "withdraw":
 						TransactionTemplate ttW = om.readValue(req.getReader(), TransactionTemplate.class);
+						AuthService.acctGuard(accountController.findById(ttW.getAccountId()));
 						if (accountController.withdraw(req.getSession(false), ttW)) {
 							res.setStatus(200);
 							message = new MessageTemplate(
@@ -170,6 +172,7 @@ public class FrontController extends HttpServlet {
 						break;
 					case "deposit":
 						TransactionTemplate ttD = om.readValue(req.getReader(), TransactionTemplate.class);
+						AuthService.acctGuard(accountController.findById(ttD.getAccountId()));
 						if (accountController.deposit(req.getSession(false), ttD)) {
 							res.setStatus(200);
 							message = new MessageTemplate(
@@ -183,8 +186,10 @@ public class FrontController extends HttpServlet {
 						break;
 					case "transfer":
 						TransferTemplate ttt = om.readValue(req.getReader(), TransferTemplate.class);
+						AuthService.acctGuard(accountController.findById(ttt.getSourceAccountId()));
+						AuthService.acctGuard(accountController.findById(ttt.getTargetAccountId()));
 						if (accountController.transfer(req.getSession(false), ttt)) {
-							res.setStatus(200);
+							res.setStatus(202);
 							message = new MessageTemplate("$" + ttt.getAmount() + " has been transferred from Account #"
 									+ ttt.getSourceAccountId() + " to Account #" + ttt.getTargetAccountId());
 							res.getWriter().println(om.writeValueAsString(message));
@@ -193,6 +198,20 @@ public class FrontController extends HttpServlet {
 							message = new MessageTemplate("Insufficient Funds");
 							res.getWriter().println(om.writeValueAsString(message));
 						}
+						break;
+					case "addJoint":
+						HttpSession session = req.getSession(false);
+						AuthService.guard(session, "Premium");
+						JointTemplate jt = om.readValue(req.getReader(), JointTemplate.class);
+						AuthService.acctGuard(accountController.findById(jt.getAccountId()));
+						List<AccountDisplay> accounts = accountController.addJoint(session, jt);
+						if (accounts == null) {
+							res.setStatus(400);
+							message = new MessageTemplate("Error adding joint account");
+							res.getWriter().println(om.writeValueAsString(message));
+						}
+						res.setStatus(201);
+						res.getWriter().println(om.writeValueAsString(accounts));
 						break;
 					case "passTime":
 						AuthService.guard(req.getSession(false), "Admin");

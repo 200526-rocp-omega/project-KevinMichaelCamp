@@ -6,13 +6,19 @@ import javax.servlet.http.HttpSession;
 
 import com.revature.exceptions.NotLoggedInException;
 import com.revature.exceptions.RoleNotAllowedException;
+import com.revature.models.Account;
 import com.revature.models.User;
 
 public class AuthService {
-	public static void guard(HttpSession session, String... roles) {
+
+	public static void guard(HttpSession session) {
 		if (session == null || session.getAttribute("currentUser") == null) {
 			throw new NotLoggedInException();
 		}
+	}
+
+	public static void guard(HttpSession session, String... roles) {
+		guard(session);
 
 		User u = (User) session.getAttribute("currentUser");
 		String role = u.getRole().getRole();
@@ -53,4 +59,11 @@ public class AuthService {
 			throw e;
 		}
 	}
+
+	public static void acctGuard(Account a) {
+		if (a.getStatus().getId() != 2) {
+			throw new RoleNotAllowedException();
+		}
+	}
+
 }

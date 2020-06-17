@@ -14,6 +14,7 @@ import com.revature.models.UserAccount;
 import com.revature.services.AccountService;
 import com.revature.services.UserAccountService;
 import com.revature.templates.AccountTemplate;
+import com.revature.templates.JointTemplate;
 import com.revature.templates.TimeTemplate;
 import com.revature.templates.TransactionTemplate;
 import com.revature.templates.TransferTemplate;
@@ -25,7 +26,11 @@ public class AccountController {
 	public List<AccountDisplay> findAllAccounts() {
 		return acctService.findAll();
 	}
-
+	
+	public Account findById(int id) {
+		return acctService.findById(id);
+	}
+	
 	public List<AccountDisplay> findAccountByID(HttpSession session, int id) {
 		List<User> acctUsers = uaService.findUsersByAcct(id);
 		Set<Integer> userIds = new HashSet<>();
@@ -35,7 +40,7 @@ public class AccountController {
 		AuthService.guard(session, userIds, "Admin");
 		return uaService.findByAcct(id);
 	}
-
+	
 	public List<AccountDisplay> findAccountsByUser(HttpSession session, int id) {
 		return uaService.findAcctsByUser(id);
 	}
@@ -56,6 +61,17 @@ public class AccountController {
 
 	public Account update(int id, Account a) {
 		return acctService.update(id, a);
+	}
+
+	public List<AccountDisplay> addJoint(HttpSession session, JointTemplate jt) {
+		User u = (User) session.getAttribute("currentUser");
+		if (uaService.findUsersByAcct(jt.getAccountId()).get(0).getId() != u.getId()) {
+			return null;
+		}
+		if (uaService.createJoin(jt.getUserId(), jt.getAccountId())) {
+			return uaService.findByAcct(jt.getAccountId());
+		}
+		return null;
 	}
 
 	public boolean withdraw(HttpSession session, TransactionTemplate tt) {
