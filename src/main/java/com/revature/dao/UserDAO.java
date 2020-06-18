@@ -138,15 +138,14 @@ public class UserDAO implements IUserDAO {
 	public User update(int id, User u) {
 		try (Connection conn = ConnectionUtil.getConnection()) {
 			String hashed = BCrypt.hashpw(u.getPassword(), BCrypt.gensalt());
-			String sql = "UPDATE USERS SET username = ?, password = ?, first_name = ?, last_name = ?, email = ?, role_id = ? WHERE id = ?";
+			String sql = "UPDATE USERS SET username = ?, password = ?, first_name = ?, last_name = ?, email = ? WHERE id = ?";
 			PreparedStatement stmt = conn.prepareStatement(sql);
 			stmt.setString(1, u.getUsername());
 			stmt.setString(2, hashed);
 			stmt.setString(3, u.getFirstName());
 			stmt.setString(4, u.getLastName());
 			stmt.setString(5, u.getEmail());
-			stmt.setInt(6, u.getRole().getId());
-			stmt.setInt(7, id);
+			stmt.setInt(6, id);
 
 			if (stmt.executeUpdate() != 0)
 				return findById(id);
